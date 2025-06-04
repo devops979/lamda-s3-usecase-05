@@ -1,59 +1,64 @@
-variable "dest_bucket_name" {
-    description = "The name of the destination bucket"
-    type        = string
-}
-variable "sns_topic_arn" {
-    description = "The name of the sns topic"
-    type        = string
-}
-
-variable "source_bucket_name" {
-    description = "The name of the source bucket"
-    type        = string
-}
-
-variable "resize_width" {
-  type        = number
-  description = "The target width in pixels for resizing images"
-}
-
-
-
-variable "tags" {
-  type        = string
-  description = "The Name of tags to assign to the resource"
-}
-
-
-
 variable "function_name" {
-  description = "The name of the Lambda function"
-  type        = string
-}
-
-variable "handler" {
-  description = "The handler for the Lambda function"
-  type        = string
-}
-
-variable "runtime" {
-  description = "The runtime for the Lambda function"
+  description = "Name of the Lambda function"
   type        = string
 }
 
 variable "role_arn" {
-  description = "The ARN of the IAM role for the Lambda function"
+  description = "ARN of the IAM role for Lambda"
   type        = string
+}
+
+variable "runtime" {
+  description = "Lambda runtime (e.g., python3.9)"
+  type        = string
+  default     = "python3.9"
+}
+
+variable "handler" {
+  description = "Lambda handler (e.g., lambda_function.lambda_handler)"
+  type        = string
+  default     = "lambda_function.lambda_handler"
 }
 
 variable "filename" {
-  description = "The filename of the Lambda deployment package"
+  description = "Path to the deployment package"
   type        = string
 }
 
-#variable "environment_variables" {
-#  description = "Environment variables for the Lambda function"
-#  type        = map(string)
-#  default     = {}
-#}
+variable "source_bucket_name" {
+  description = "Name of the source S3 bucket"
+  type        = string
+}
 
+variable "dest_bucket_name" {
+  description = "Name of the destination S3 bucket"
+  type        = string
+}
+
+variable "sns_topic_arn" {
+  description = "ARN of the SNS topic"
+  type        = string
+}
+
+variable "resize_width" {
+  description = "Width to resize images to"
+  type        = number
+}
+
+variable "memory_size" {
+  description = "Memory allocation in MB"
+  type        = number
+  default     = 128
+}
+
+variable "timeout" {
+  description = "Timeout in seconds"
+  type        = number
+  default     = 30
+}
+
+variable "tags" {
+  description = "Resource tags"
+  type        = map(string)
+  default     = {}
+}

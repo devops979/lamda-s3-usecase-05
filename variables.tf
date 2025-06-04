@@ -1,9 +1,10 @@
-variable "source_bucket_name" { default = "source-bucket-image-lavanya" }
-variable "dest_bucket_name"   { default = "dest-bucket-image-lavanya" }
-variable "sns_topic_name"     { default = "image-topic" }
-variable "lambda_function_name" { default = "lambda-image" }
+variable "source_bucket_name" { default = "source-bucket-image-original" }
+variable "processed_bucket_name" { default = "dest-bucket-image-processed" }
+variable "dest_bucket_name" { default = "dest-bucket-image-processed" }
+variable "sns_topic_name" { default = "image-topic" }
+variable "lambda_function_name" { default = "lambda-image-resize" }
 variable "resize_width" { default = 600 }
- 
+
 variable "tags" {
   type = map(string)
   default = {
@@ -12,9 +13,21 @@ variable "tags" {
     ManagedBy = "Terraform"
   }
 }
-variable "email" { 
-  default = "elavanya@hcltech.com"
+variable "email" {
+  default = "anilkumar.padarthi@hcltech.com"
 }
-variable "lambda_role" { 
+variable "lambda_role" {
   default = "lambda_role_s3_image"
+}
+
+variable "environment" {
+  description = "The environment for the resources (e.g., dev, prod)"
+  type        = string
+  default     = "dev"
+}
+
+variable "enable_versioning" {
+  type        = bool
+  default     = true
+  description = "Enable versioning on the S3 buckets"
 }

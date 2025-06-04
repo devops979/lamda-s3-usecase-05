@@ -1,28 +1,27 @@
 
 # modules/iam/main.tf
 resource "aws_iam_role" "lambda_exec" {
-  name = var.lambda_role
- 
+  name = var.role_name
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [{
-      Effect = "Allow",
+      Effect    = "Allow",
       Principal = { Service = "lambda.amazonaws.com" },
-      Action = "sts:AssumeRole"
+      Action    = "sts:AssumeRole"
     }]
   })
 }
- 
+
 resource "aws_iam_role_policy" "lambda_policy" {
-  name = "lambda_policy"
+  name = var.policy_name
   role = aws_iam_role.lambda_exec.id
- 
+
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
       {
-        Effect   = "Allow",
-        Action   = [
+        Effect = "Allow",
+        Action = [
           "s3:GetObject",
           "s3:ListBucket",
           "s3:PutObject"
@@ -33,8 +32,8 @@ resource "aws_iam_role_policy" "lambda_policy" {
         ]
       },
       {
-        Effect   = "Allow",
-        Action   = [
+        Effect = "Allow",
+        Action = [
           "s3:GetObject",
           "s3:ListBucket",
           "s3:PutObject"
