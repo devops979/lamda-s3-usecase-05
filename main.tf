@@ -8,41 +8,30 @@ module "destination_bucket" {
   bucket_name = "bucket-for-storing14010"
 }
 
+module "sns" {
+  source           = "./modules/sns"
+  topic_name       = var.sns_topic_name
+  tags             = var.tags
+  email            = var.email
+}
+ 
 module "iam" {
-  source             = "./modules/iam"
-  role_name          = "lambda_exec_role"
-  policy_name        = "lambda_policy"
-  source_bucket      = module.source_bucket.bucket_name
-  destination_bucket = module.destination_bucket.bucket_name
+  source            = "./modules/iam"
+  source_bucket_arn = module.s3.source_bucket_arn
+  dest_bucket_arn   = module.s3.dest_bucket_arn
+  sns_topic_arn     = module.sns.topic_arn
+  lambda_role         = var.lambda_role
 }
-
-module "lambda_function" {
-  source               = "./modules/lambda_function"
-  function_name        = "image_processor"
+ 
+module "lambda" {
+  source             = "./modules/lambda"
+  function_name      = var.lambda_function_name
+  role_arn           = module.iam.lambda_role_arn
   handler              = "index.lambda_handler"
-  runtime              = "python3.8"
-  role_arn             = module.iam.lambda_exec_role_arn
   filename             = "lambda.zip"
-  environment_variables = {
-    DEST_BUCKET = module.destination_bucket.bucket_name
-  }
-}
-
-resource "aws_s3_bucket_notification" "bucket_notification" {
-  bucket = module.source_bucket.bucket_name
-
-  lambda_function {
-    lambda_function_arn = module.lambda_function.arn
-    events              = ["s3:ObjectCreated:*"]
-  }
-
-  depends_on = [aws_lambda_permission.allow_s3_invocation]
-}
-
-resource "aws_lambda_permission" "allow_s3_invocation" {
-  statement_id  = "AllowS3Invocation"
-  action        = "lambda:InvokeFunction"
-  function_name = module.lambda_function.function_name
-  principal     = "s3.amazonaws.com"
-  source_arn    = module.source_bucket.arn
+  source_bucket_name = var.source_bucket_name
+  dest_bucket_name   = var.dest_bucket_name
+  sns_topic_arn      = module.sns.topic_arn
+  resize_width       = var.resize_width
+  tags               = var.tags
 }

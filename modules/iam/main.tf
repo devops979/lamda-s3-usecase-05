@@ -1,64 +1,60 @@
 
 # modules/iam/main.tf
-resource "aws_iam_role" "lambda_exec_role" {
-  name = var.role_name
-
+resource "aws_iam_role" "lambda_exec" {
+  name = var.lambda_role
+ 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = { Service = "lambda.amazonaws.com" },
+      Action = "sts:AssumeRole"
+    }]
   })
 }
-
-resource "aws_iam_policy" "lambda_policy" {
-  name        = var.policy_name
-  description = "IAM policy for Lambda execution"
-  policy      = jsonencode({
-    Version = "2012-10-17"
+ 
+resource "aws_iam_role_policy" "lambda_policy" {
+  name = "lambda_policy"
+  role = aws_iam_role.lambda_exec.id
+ 
+  policy = jsonencode({
+    Version = "2012-10-17",
     Statement = [
       {
-        Action = [
+        Effect   = "Allow",
+        Action   = [
           "s3:GetObject",
+          "s3:ListBucket",
           "s3:PutObject"
-        ]
-        Effect   = "Allow"
+        ],
         Resource = [
-          "arn:aws:s3:::${var.source_bucket}/*",
-          "arn:aws:s3:::${var.destination_bucket}/*"
+          "${var.source_bucket_arn}/*",
+          "${var.source_bucket_arn}"
         ]
+      },
+      {
+        Effect   = "Allow",
+        Action   = [
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:PutObject"
+        ],
+        Resource = [
+          "${var.dest_bucket_arn}/*",
+          "${var.dest_bucket_arn}"
+        ]
+      },
+      {
+        Effect   = "Allow",
+        Action   = ["sns:Publish"],
+        Resource = var.sns_topic_arn
+      },
+      {
+        Effect   = "Allow",
+        Action   = ["logs:*"],
+        Resource = "*"
       }
     ]
   })
 }
-
-resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
-  role       = aws_iam_role.lambda_exec_role.name
-  policy_arn = aws_iam_policy.lambda_policy.arn
-}
-
-variable "role_name" {
-  description = "The name of the IAM role"
-  type        = string
-}
-
-variable "policy_name" {
-  description = "The name of the IAM policy"
-  type        = string
-}
-
-variable "source_bucket" {
-  description = "The source S3 bucket"
-  type        = string
-}
-
-variable "destination_bucket" {
-  description = "The destination S3 bucket"
-  type        = string
-}
+ 
